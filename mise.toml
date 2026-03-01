@@ -2,8 +2,7 @@
 MFT_CONFIG = "./mft.yaml"
 
 [tools]
-air = "latest"
-go = "latest"
+go = "1.26"
 
 [tasks.run]
 alias = "r"
@@ -13,3 +12,78 @@ run = "go run ./cmd/mft/main.go"
 [tasks.test]
 description = "Test all"
 run = "go test ./..."
+
+[tasks.coverage]
+alias = "cov"
+description = "Affiche le résumé du coverage dans la console"
+run = "go test -cover ./..."
+
+[tasks.coverage_report]
+alias = "cr"
+description = "Génère le profil et vérifie le seuil de couverture"
+run = """
+set -e
+go test -coverprofile=coverage.out ./...
+TOTAL_COV=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+echo "Couverture actuelle : $TOTAL_COV%"
+
+if awk "BEGIN {exit !($TOTAL_COV < $COVERAGE_THRESHOLD)}"; then
+    echo "ÉCHEC : couverture ${TOTAL_COV}% inférieure au seuil ${COVERAGE_THRESHOLD}%"
+    exit 1
+fi
+echo "Seuil respecté : ${TOTAL_COV}%"
+"""
+
+[tasks.coverage_view]
+alias = "cv"
+description = "Ouvre le rapport de couverture dans le navigateur"
+depends = ["coverage_report"]
+run = "go tool cover -html=coverage.out"
+
+[tasks.commit]
+alias = "c"
+description = "Commit interactif aux normes Pro"
+run = "commitizen-go"
+
+[tasks.changelog]
+alias = "log"
+description = "Génère ou met à jour le fichier CHANGELOG.md"
+run = "git-chglog -o CHANGELOG.md"
+
+[tasks.setup]
+description = "Installe les outils et configure les hooks"
+run = """
+set -e
+echo "📥 Installation de commitizen-go..."
+go install github.com/lintingzhen/commitizen-go@latest
+
+echo "📥 Installation de git-chglog..."
+go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest
+
+echo "⚓ Configuration des Git Hooks..."
+git config core.hooksPath .githooks
+
+echo "📦 Nettoyage des modules Go..."
+go mod tidy
+
+echo "✅ Setup terminé !"
+"""
+
+
+[tasks.release]
+description = "Crée une nouvelle version (changelog + tag)"
+run = """
+set -e
+
+echo "Entrez la nouvelle version (ex: v1.0.1) :"
+read VERSION
+
+git-chglog -o CHANGELOG.md --next-tag "$VERSION"
+
+git add CHANGELOG.md
+git commit -m "chore(docs): update changelog for $VERSION"
+
+git tag "$VERSION"
+echo "✅ Version $VERSION créée avec succès !"
+echo "N'oubliez pas de faire : git push origin main --tags"
+"""

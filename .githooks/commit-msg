@@ -1,0 +1,16 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+# Lire seulement la première ligne non vide et sans commentaire
+COMMIT_MSG=$(grep -v '^#' "$COMMIT_MSG_FILE" | grep -v '^$' | head -1)
+
+REGEXP="^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|ops|revert)(\([a-z0-9/_-]+\))?(!)?: .{1,100}$"
+
+if [[ ! $COMMIT_MSG =~ $REGEXP ]]; then
+  echo "❌ Format de commit invalide !"
+  echo "Attendu : type(scope): message"
+  echo "Exemple : feat(api): add new endpoint"
+  exit 1
+fi
+
+echo "✅ Message de commit valide."

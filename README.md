@@ -28,6 +28,7 @@ Val: I2P dest + AppID         HAVE? / GET / CHUNKS
 ```
 
 **Two databases:**
+
 - DHT — shared peer directory (minimal)
 - BadgerDB — local full catalogue (G-Set CRDT, grow-only)
 
@@ -37,10 +38,10 @@ Val: I2P dest + AppID         HAVE? / GET / CHUNKS
 
 Each peer has two independent identities:
 
-| Identity | Purpose |
-|---|---|
+| Identity             | Purpose                                              |
+| -------------------- | ---------------------------------------------------- |
 | **App ID** (Ed25519) | Stable network identity, signs all published content |
-| **I2P Destination** | Network address, never reveals real IP |
+| **I2P Destination**  | Network address, never reveals real IP               |
 
 The App ID remains constant even if the I2P destination changes — peers verify signatures independently.
 
@@ -77,6 +78,15 @@ cd mft
 go build ./cmd/mft
 ```
 
+### 🛠 Développement
+
+Ce projet utilise [mise-en-place](https://mise.jdx.dev/).
+Pour commencer :
+
+1. `mise install`
+2. `mise run setup` (pour configurer les git hooks)
+3. `mise run test`
+
 ### Configuration
 
 Config file path via `MFT_CONFIG` env var, defaults to `./mft.yaml`.
@@ -85,8 +95,8 @@ Generated automatically on first run:
 
 ```yaml
 identity:
-  private_key: "base64..."   # Ed25519 seed (32 bytes)
-  app_id: "hexstring..."     # public key hex (network identifier)
+  private_key: "base64..." # Ed25519 seed (32 bytes)
+  app_id: "hexstring..." # public key hex (network identifier)
 ```
 
 ---
