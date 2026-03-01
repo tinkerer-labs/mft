@@ -1,0 +1,15 @@
+[env]
+MFT_CONFIG = "./mft.yaml"
+
+[tools]
+air = "latest"
+go = "latest"
+
+[tasks.run]
+alias = "r"
+description = "Build with air"
+run = "go run ./cmd/mft/main.go"
+
+[tasks.test]
+description = "Test all"
+run = "go test ./..."
